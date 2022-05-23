@@ -7,11 +7,12 @@ import {
   AiOutlineStar,
 } from "react-icons/ai";
 import { Product } from "../../components";
+import { useStateContext } from "../../context/StateContext";
 
 const ProductDetails = ({ product, products }) => {
   const { image, name, details, price } = product;
-
   const [index, setIndex] = useState(0);
+  const { decreaseQuantity, increaseQuantity, qty, onAdd } = useStateContext();
 
   return (
     <div>
@@ -26,6 +27,7 @@ const ProductDetails = ({ product, products }) => {
           <div className="small-images-container">
             {image?.map((item, i) => (
               <img
+                key={i}
                 src={urlFor(item)}
                 className={
                   i === index ? "small-image selected-image" : "small-image"
@@ -53,17 +55,21 @@ const ProductDetails = ({ product, products }) => {
           <div className="quantity">
             <h3>Quantity</h3>
             <p className="quantity-desc">
-              <span className="minus">
+              <span className="minus" onClick={decreaseQuantity}>
                 <AiOutlineMinus />
               </span>
-              <span className="num">0</span>
-              <span className="plus">
+              <span className="num">{qty}</span>
+              <span className="plus" onClick={increaseQuantity}>
                 <AiOutlinePlus />
               </span>
             </p>
           </div>
           <div className="buttons">
-            <button type="button" className="add-to-cart">
+            <button
+              type="button"
+              className="add-to-cart"
+              onClick={() => onAdd(product, qty)}
+            >
               Add to Cart
             </button>
             <button type="button" className="buy-now">
@@ -111,8 +117,6 @@ export const getStaticProps = async ({ params: { slug } }) => {
 
   const product = await client.fetch(query);
   const products = await client.fetch(productsQuery);
-
-  console.log(products);
 
   return {
     props: { products, product },
